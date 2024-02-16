@@ -133,6 +133,14 @@ void convolutionFunction(std::string filePath)
         }
         yOutput[k] = result;
         result = 0;
+        previousJ = 0;
+    }
+
+    std::ofstream file(filePath);
+    for(auto value : yOutput)
+    {
+        value = value & 0x000000ffffffffff;
+        file << std::hex << std::setw(10) << std::setfill('0') << std::uppercase << value << std::endl; //Write value to file
     }
 }
 
@@ -148,7 +156,7 @@ int main(int argc, char *argv[])
 {
     if (argc != 5)
     {
-        std::cerr << "Usage: " << argv[0] << "<path/to/coeff.in> <path/to/data.in> <path/to/output.out>\n";
+        std::cerr << "Usage: " << argv[0] << "<path/to/coeff.in> <path/to/rj.in> <path/to/data.in> <path/to/output.out>\n";
         return 1;
     }
 
@@ -158,6 +166,7 @@ int main(int argc, char *argv[])
 
     if (fileParseStatus == 1) // If failed to parse file end program
     {
+        std::cout << "Failed to read Coeff.in file" << std::endl;
         return 1;
     }
 
@@ -165,6 +174,7 @@ int main(int argc, char *argv[])
 
     if (fileParseStatus == 1) // If failed to parse the file end program
     {
+        std::cout << "Failed to read data.in file" << std::endl;
         return 1;
     }
 
@@ -172,8 +182,13 @@ int main(int argc, char *argv[])
 
     if (fileParseStatus == 1) // If failed to parse the file end program
     {
+        std::cout << "Failed to read Rj.in file" << std::endl;
         return 1;
     }
+
+    convolutionFunction(argv[4]);
+
+    std::cout << "Convolution result uploaded to file: " << argv[4] << std::endl;
 
     return 0;
 }
