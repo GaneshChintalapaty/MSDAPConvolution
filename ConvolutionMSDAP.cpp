@@ -96,7 +96,7 @@ int64_t calculateXValue(uint16_t nValue, uint16_t kValue, bool flag)
         {
             xValue = 0x0000000000000000 | xData[nValue - kValue];
         }
-        xValue = xValue << 10;
+        xValue = xValue << 16;
         if (flag == true)
         {
             xValue = ~xValue + 1;
@@ -114,7 +114,7 @@ void convolutionFunction(std::string filePath)
     uint16_t i, j, k, readSignBit;
     bool signFlag = false;
     uint16_t tmp, count = 0;
-    std::vector<uint64_t> yOutput(xData.size(), 0); // To store output data computed from the above two vectors
+    std::vector<int64_t> yOutput(xData.size(), 0); // To store output data computed from the above two vectors
 
     for (k = 0; k < xData.size(); k++)
     {
