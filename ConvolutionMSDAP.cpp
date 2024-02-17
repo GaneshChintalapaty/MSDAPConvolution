@@ -19,7 +19,7 @@
 // Include Vector variables here
 std::vector<uint16_t> hCoeff; // To store data from coeff.in
 std::vector<uint16_t> xData;  // To store data from data.in
-std::vector<uint8_t> rJData;  // To store data from Rj.in
+std::vector<uint16_t> rJData;  // To store data from Rj.in
 // End Vector variables
 
 #pragma endregion
@@ -61,7 +61,7 @@ int parse(std::string filePath, uint8_t selectVectorToStoreData)
             break;
             case 3:
             {
-                uint8_t hexRj;
+                uint16_t hexRj;
                 std::stringstream(hexString) >> std::hex >> hexRj; // Convert to hex
                 rJData.push_back(hexRj);
             }
@@ -111,9 +111,9 @@ int64_t calculateXValue(uint16_t nValue, uint16_t kValue, bool flag)
 void convolutionFunction(std::string filePath)
 {
     int64_t result = 0;
-    uint16_t i, j, k, readSignBit, count;
+    uint16_t i, j, k, readSignBit;
     bool signFlag = false;
-    uint8_t tmp;
+    uint16_t tmp, count = 0;
     std::vector<uint64_t> yOutput(xData.size(), 0); // To store output data computed from the above two vectors
 
     for (k = 0; k < xData.size(); k++)
@@ -123,9 +123,8 @@ void convolutionFunction(std::string filePath)
         {
             while (count != rJData[i])
             {
-                readSignBit = 0x100;
-                readSignBit = readSignBit & hCoeff[j];
-                if (readSignBit == 0x100)
+                readSignBit = 0x0100 & hCoeff[j];
+                if (readSignBit == 0x0100)
                 {
                     signFlag = true;
                 }
@@ -139,6 +138,7 @@ void convolutionFunction(std::string filePath)
                 j = j + 1;
             }
             result = result >> 1;
+            count = 0;
         }
         yOutput[k] = result;
         result = 0;
