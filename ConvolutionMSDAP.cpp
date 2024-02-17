@@ -86,11 +86,18 @@ int parse(std::string filePath, uint8_t selectVectorToStoreData)
 int64_t calculateXValue(uint16_t nValue, uint16_t kValue, bool flag)
 {
     int64_t xValue = 0;
-    if(nValue - kValue >= 0)
+    if (nValue - kValue >= 0)
     {
-        xValue = 0xFFFFFFFFFFFF0000 | xData[nValue];
+        if (xData[nValue] & 0x8000 == 0x8000)
+        {
+            xValue = 0xFFFFFFFFFFFF0000 | xData[nValue - kValue];
+        }
+        else
+        {
+            xValue = 0x0000000000000000 | xData[nValue - kValue];
+        }
         xValue = xValue << 10;
-        if(flag == true)
+        if (flag == true)
         {
             xValue = ~xValue + 1;
         }
@@ -104,16 +111,17 @@ int64_t calculateXValue(uint16_t nValue, uint16_t kValue, bool flag)
 void convolutionFunction(std::string filePath)
 {
     int64_t result = 0;
-    uint16_t i, j, k, readSignBit, previousJ = 0;
+    uint16_t i, j, k, readSignBit, count;
     bool signFlag = false;
     uint8_t tmp;
     std::vector<uint64_t> yOutput(xData.size(), 0); // To store output data computed from the above two vectors
 
     for (k = 0; k < xData.size(); k++)
     {
+        j = 0;
         for (i = 0; i < rJData.size(); i++)
         {
-            for (j = previousJ; j < rJData[i]; j++)
+            while (count != rJData[i])
             {
                 readSignBit = 0x100;
                 readSignBit = readSignBit & hCoeff[j];
@@ -125,22 +133,22 @@ void convolutionFunction(std::string filePath)
                 {
                     signFlag = false;
                 }
-                tmp = hCoeff[j] & 0xFF;
+                tmp = hCoeff[j] & 0x00FF;
                 result = result + calculateXValue(k, tmp, signFlag);
+                count = count + 1;
+                j = j + 1;
             }
             result = result >> 1;
-            previousJ = j + 1;
         }
         yOutput[k] = result;
         result = 0;
-        previousJ = 0;
     }
 
     std::ofstream file(filePath);
-    for(auto value : yOutput)
+    for (auto value : yOutput)
     {
         value = value & 0x000000ffffffffff;
-        file << std::hex << std::setw(10) << std::setfill('0') << std::uppercase << value << std::endl; //Write value to file
+        file << std::hex << std::setw(10) << std::setfill('0') << std::uppercase << value << std::endl; // Write value to file
     }
 }
 
