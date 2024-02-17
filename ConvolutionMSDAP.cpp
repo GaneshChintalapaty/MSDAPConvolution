@@ -83,21 +83,20 @@ int parse(std::string filePath, uint8_t selectVectorToStoreData)
 
 #pragma endregion
 
+#pragma region Calculate x(n-coeff) value
+
+/// @brief The following function is used to calculate the x(n-coeff) value
+/// @param nValue index of data.in variable type = uint16_t
+/// @param kValue value of coeff.in variable type = uint16_t
+/// @param flag varaible type = boolean used to indicate sign bit
+/// @return value of x(n-coeff) is returned
 int64_t calculateXValue(uint16_t nValue, uint16_t kValue, bool flag)
 {
     int64_t xValue = 0;
-    if (nValue - kValue >= 0)
+    if (nValue - kValue >= 0)   //x(-255) = ...... = x(-1) = 0
     {
-        if (xData[nValue] & 0x8000 == 0x8000)
-        {
-            xValue = 0xFFFFFFFFFFFF0000 | xData[nValue - kValue];
-        }
-        else
-        {
-            xValue = 0x0000000000000000 | xData[nValue - kValue];
-        }
-        xValue = xValue << 16;
-        if (flag == true)
+        xValue = xData[nValue - kValue] << 16;
+        if (flag == true)   //If sign bit high
         {
             xValue = ~xValue + 1;
         }
@@ -105,9 +104,12 @@ int64_t calculateXValue(uint16_t nValue, uint16_t kValue, bool flag)
     return xValue;
 }
 
+#pragma endregion
+
 #pragma region Convolution Function
 
 /// @brief The function is used to perform convolution for each data set in data.in file and push the result in yOutput vector
+/// @param filePath Variable type = string
 void convolutionFunction(std::string filePath)
 {
     int64_t result = 0;
@@ -116,7 +118,7 @@ void convolutionFunction(std::string filePath)
     uint16_t tmp, count = 0;
     std::vector<int64_t> yOutput(xData.size(), 0); // To store output data computed from the above two vectors
 
-    for (k = 0; k < xData.size(); k++)
+    for (k = 0; k < xData.size(); k++)  //To calculate y(k) output
     {
         j = 0;
         for (i = 0; i < rJData.size(); i++)
@@ -144,7 +146,7 @@ void convolutionFunction(std::string filePath)
         result = 0;
     }
 
-    std::ofstream file(filePath);
+    std::ofstream file(filePath);   //Write 10bit output value to file
     for (auto value : yOutput)
     {
         value = value & 0x000000ffffffffff;
