@@ -39,9 +39,9 @@ int parse(std::string filePath, uint8_t selectVectorToStoreData)
         std::string line;                     // string to store data to process
         while (std::getline(inputFile, line)) // Read each line till the end of file
         {
-            std::istringstream iss(line); // To convert string to hex number
-            std::string hexString;
-            iss >> hexString;
+            //std::istringstream iss(line); // To convert string to hex number
+            std::string hexString = line.substr(0,4);
+            //iss >> hexString;
 
             switch (selectVectorToStoreData)
             {
